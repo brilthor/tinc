@@ -520,6 +520,7 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
         char *balpos;
         bool resetbucket;
         avl_node_t *node2;
+        char search[] = "_bal";
 
 	if(n == myself) {
 		if(overwrite_mac)
@@ -540,18 +541,23 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
 	via = (packet->priority == -1 || n->via == myself) ? n->nexthop : n->via;
 
         /*check to see if the node we are to send traffic to has a balXX suffix and initiate balancing if it does*/
-        if (balpos = strstr(via->name,'_bal')){
-            
+        logger(LOG_ERR, "about to search");
+        if (balpos = strstr(via->name,search)){
+
+            logger(LOG_ERR, "found that it was a hop");
             mainlen = strlen(via->name) - strlen(balpos);
             resetbucket = (via->antibucket > 100000);
 
             /*Search only nodes attached to the node we were given, will be a requirement for now*/
+            logger(LOG_ERR, "about to loop through tree");
             for (node2 = via->edge_tree->head; node2; node2 = node2->next){
                 /*right now this will repeat over certain entries twice*/
                 edge = node2->data;
+                processing = edge->to;
 
                 /*check if the node is part of the same group*/
-                if ( (edge->to != via) && (strspn(processing->name, via->name) >= mainlen) ){
+                if ( ( processing != via) && (strspn(processing->name, via->name) >= mainlen) ){
+
                     /*check if it is directly reachable and has sent less weighted traffic that the current contender*/
                     if ( (processing->antibucket / processing->bucketweight) < (via->antibucket / via->bucketweight) && processing->status.reachable ){
                         via = processing;
