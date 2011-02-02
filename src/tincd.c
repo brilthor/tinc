@@ -62,6 +62,8 @@
 #include "utils.h"
 #include "xalloc.h"
 
+#include <sys/resource.h>
+
 /* The name this program was run with. */
 char *program_name = NULL;
 
