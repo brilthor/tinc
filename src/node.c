@@ -62,6 +62,9 @@ node_t *new_node(void) {
 	n->mtu = MTU;
 	n->maxmtu = MTU;
 
+        n->antibucket = 0;
+        n->bucketweight = 1;
+
 	return n;
 }
 
