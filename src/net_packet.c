@@ -514,7 +514,12 @@ end:
   send a packet to the given vpn ip.
 */
 void send_packet(const node_t *n, vpn_packet_t *packet) {
-	node_t *via;
+	node_t *via, *processing;
+        edge_t *edge;
+        int mainlen;
+        char *balpos;
+        bool resetbucket;
+        avl_node_t *node2;
 
 	if(n == myself) {
 		if(overwrite_mac)
@@ -534,6 +539,32 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
 
 	via = (packet->priority == -1 || n->via == myself) ? n->nexthop : n->via;
 
+        /*check to see if the node we are to send traffic to has a balXX suffix and initiate balancing if it does*/
+        if (balpos = strstr(via->name,'_bal')){
+            
+            mainlen = strlen(via->name) - strlen(balpos);
+            resetbucket = (via->antibucket > 100000);
+
+            /*Search only nodes attached to the node we were given, will be a requirement for now*/
+            for (node2 = via->edge_tree->head; node2; node2 = node2->next){
+                /*right now this will repeat over certain entries twice*/
+                edge = node2->data;
+
+                /*check if the node is part of the same group*/
+                if ( (edge->to != via) && (strspn(processing->name, via->name) >= mainlen) ){
+                    /*check if it is directly reachable and has sent less weighted traffic that the current contender*/
+                    if ( (processing->antibucket / processing->bucketweight) < (via->antibucket / via->bucketweight) && processing->status.reachable ){
+                        via = processing;
+                    }
+                    if (resetbucket){
+                        processing->antibucket = 0;
+                    }
+                }
+            }
+        }
+        /*update the bucket with the amount of data we sent to the node*/
+        via->antibucket += packet->len;
+        
 	if(via != n)
 		ifdebug(TRAFFIC) logger(LOG_INFO, "Sending packet to %s via %s (%s)",
 			   n->name, via->name, n->via->hostname);
