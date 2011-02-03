@@ -86,7 +86,7 @@ typedef struct node_t {
 	int mtuprobes;				/* Number of probes */
 	event_t *mtuevent;			/* Probe event */
 
-        int antibucket;                         /* used for keeping track of how much we are putting through this line, 8byte increments (1kb = 128)*/
+        int antibucket;                         /* used for keeping track of how much we are putting through this line, in bytes*/
         int bucketweight;                       /* divide the above by this to achive a weighted choice*/
 } node_t;
 

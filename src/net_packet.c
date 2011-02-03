@@ -545,7 +545,7 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
         if (balpos = strstr(via->name,search)){
 
             mainlen = strlen(via->name) - strlen(balpos) + strlen(search);
-            resetbucket = (via->antibucket > 100000);
+            resetbucket = (via->antibucket > 800000);
 
             ifdebug(TRAFFIC) logger(LOG_ERR, "found that it was a hop and mainlen is %d, and balpos is %s, and via name is %s",mainlen,balpos,via->name);
 
