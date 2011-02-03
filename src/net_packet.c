@@ -572,11 +572,12 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
                     }
                 }
             }
+            /*update the bucket with the amount of data we sent to the node*/
+            ifdebug(TRAFFIC) logger(LOG_ERR, "old antibucket size of %s is %d", via->name,via->antibucket);
+            via->antibucket += packet->len;
+            ifdebug(TRAFFIC) logger(LOG_ERR, "new antibucket size of %s is %d", via->name,via->antibucket);
         }
-        /*update the bucket with the amount of data we sent to the node*/
-        ifdebug(TRAFFIC) logger(LOG_ERR, "old antibucket size of %s is %d", via->name,via->antibucket);
-        via->antibucket += packet->len;
-        ifdebug(TRAFFIC) logger(LOG_ERR, "new antibucket size of %s is %d", via->name,via->antibucket);
+
         
 	if(via != n)
 		ifdebug(TRAFFIC) logger(LOG_INFO, "Sending packet to %s via %s (%s)",
