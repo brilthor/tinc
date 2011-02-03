@@ -213,14 +213,15 @@ void sssp_bfs(void) {
                         
                         /*check to see if we are looking at a backup route, if we are and there is already another, skip setting this one up*/
                         if(e->to->status.visited){
-                            if (strstr(n->name,"_bulk"))
+                            if (strstr(n->name,"_bulk")){
                                 if (strstr(e->to->name,"_latency"))
                                     continue;
-                            else if (strstr(n->name,"_latency"))
+                            }else if (strstr(n->name,"_latency")){
                                 if (strstr(e->to->name,"_bulk"))
                                     continue;
-                            else if(!e->to->status.indirect || indirect)
+                            }else if(!e->to->status.indirect || indirect){
                                 continue;
+                            }
                         }
                         
 
