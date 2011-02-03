@@ -562,8 +562,9 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
                 if ( ( processing != via) && (strspn(processing->name, via->name) >= mainlen) ){
 
                     /*check if it is directly reachable and has sent less weighted traffic that the current contender*/
+                    ifdebug(TRAFFIC) logger(LOG_ERR, "by name is considered valid, processing is %s, and processing->via is %s", processing->name,processing->via->name);
                     if ( (processing->antibucket / processing->bucketweight) < (via->antibucket / via->bucketweight) 
-                            && processing->status.reachable && (processing->via == processing)){
+                            && processing->status.reachable && (processing->via == myself)){
                         via = processing;
                     }
                     if (resetbucket){
