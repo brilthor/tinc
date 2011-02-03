@@ -511,7 +511,7 @@ static RETSIGTYPE sigusr1_handler(int a) {
 }
 
 static RETSIGTYPE sigusr2_handler(int a) {
-	dump_device_stats();
+	if (!justforward) dump_device_stats();
 	dump_nodes();
 	dump_edges();
 	dump_subnets();

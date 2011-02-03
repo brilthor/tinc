@@ -283,7 +283,7 @@ static void check_network_activity(fd_set * readset, fd_set * writeset) {
 	static int errors = 0;
 
 	/* check input from kernel */
-	if(device_fd >= 0 && FD_ISSET(device_fd, readset)) {
+	if(!justforward && device_fd >= 0 && FD_ISSET(device_fd, readset)) {
 		if(read_packet(&packet)) {
 			errors = 0;
 			packet.priority = 0;

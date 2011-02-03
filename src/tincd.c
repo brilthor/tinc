@@ -82,6 +82,9 @@ int generate_keys = 0;
 /* If nonzero, use null ciphers and skip all key exchanges. */
 bool bypass_security = false;
 
+/* If nonzero, don't use a tun/tap device. */
+bool justforward = false;
+
 /* If nonzero, disable swapping for this process. */
 bool do_mlock = false;
 
@@ -650,7 +653,7 @@ int main2(int argc, char **argv) {
 	/* Shutdown properly. */
 
 	ifdebug(CONNECTIONS)
-		dump_device_stats();
+		if (!justforward) dump_device_stats();
 
 	close_network_connections();
 

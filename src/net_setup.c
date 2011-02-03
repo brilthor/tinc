@@ -270,7 +270,7 @@ void load_all_subnets(void) {
 bool setup_myself(void) {
 	config_t *cfg;
 	subnet_t *subnet;
-	char *name, *hostname, *mode, *afname, *cipher, *digest;
+	char *name, *hostname, *mode, *afname, *cipher, *digest, *nettype;
 	char *fname = NULL;
 	char *address = NULL;
 	char *envp[5];
@@ -532,8 +532,15 @@ bool setup_myself(void) {
 		load_all_subnets();
 
 	/* Open device */
+        if(get_config_string(lookup_config(config_tree, "DeviceType"), &nettype)){
+            if(!strcasecmp(nettype, "justforward")){
+                /*if the interface type is set as this it will not create the device*/
+                justforward = true;
+            }
+        }
 
-	if(!setup_device())
+
+	if(!justforward && !setup_device())
 		return false;
 
 	/* Run tinc-up script to further initialize the tap interface */
@@ -696,7 +703,7 @@ void close_network_connections(void) {
 	for(i = 0; i < 4; i++)
 		free(envp[i]);
 
-	close_device();
+	if (!justforward) close_device();
 
 	return;
 }
