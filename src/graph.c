@@ -207,22 +207,24 @@ void sssp_bfs(void) {
 			     of nodes behind it.
 			 */
 
-			indirect = n->status.indirect || e->options & OPTION_INDIRECT
-				|| ((n != myself) && sockaddrcmp(&n->address, &e->reverse->address));
+			indirect = (n != myself) && (n->status.indirect || e->options & OPTION_INDIRECT
+				|| ((n != myself) && sockaddrcmp(&n->address, &e->reverse->address)));
                         
-                        
+                        ifdebug(TRAFFIC) logger(LOG_ERR, "about to process edge from %s to %s",n->name,e->to->name);
+                        ifdebug(TRAFFIC) logger(LOG_ERR, "the n->via name is %s",n->via->name);
                         /*check to see if we are looking at a backup route, if we are and there is already another, skip setting this one up*/
                         if(e->to->status.visited){
                             if (strstr(n->name,"_bulk")){
-                                if (strstr(e->to->name,"_latency"))
+                                if (strstr(e->to->name,"_latency") || strstr(e->to->via->name,"_bulk"))
                                     continue;
                             }else if (strstr(n->name,"_latency")){
-                                if (strstr(e->to->name,"_bulk"))
+                                if (strstr(e->to->name,"_bulk") || strstr(e->to->via->name,"_latency"))
                                     continue;
                             }else if(!e->to->status.indirect || indirect){
                                 continue;
                             }
                         }
+                        
                         
 
 			e->to->status.visited = true;
@@ -233,7 +235,8 @@ void sssp_bfs(void) {
 
 			if(e->to->address.sa.sa_family == AF_UNSPEC && e->address.sa.sa_family != AF_UNKNOWN)
 				update_node_udp(e->to, &e->address);
-
+                        ifdebug(TRAFFIC) logger(LOG_ERR, "the to->via name is %s after the fact",e->to->via->name);
+                        ifdebug(TRAFFIC) logger(LOG_ERR, "adding  edge from %s to %s into the todo list",n->name,e->to->name);
 			list_insert_tail(todo_list, e->to);
 		}
 
