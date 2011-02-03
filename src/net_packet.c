@@ -541,19 +541,22 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
 	via = (packet->priority == -1 || n->via == myself) ? n->nexthop : n->via;
 
         /*check to see if the node we are to send traffic to has a balXX suffix and initiate balancing if it does*/
-        logger(LOG_ERR, "about to search");
+        ifdebug(TRAFFIC) logger(LOG_ERR, "about to search");
         if (balpos = strstr(via->name,search)){
 
-            logger(LOG_ERR, "found that it was a hop");
-            mainlen = strlen(via->name) - strlen(balpos);
+            mainlen = strlen(via->name) - strlen(balpos) + strlen(search);
             resetbucket = (via->antibucket > 100000);
 
+            ifdebug(TRAFFIC) logger(LOG_ERR, "found that it was a hop and mainlen is %d, and balpos is %s, and via name is %s",mainlen,balpos,via->name);
+
             /*Search only nodes attached to the node we were given, will be a requirement for now*/
-            logger(LOG_ERR, "about to loop through tree");
+            ifdebug(TRAFFIC) logger(LOG_ERR, "about to loop through tree");
             for (node2 = via->edge_tree->head; node2; node2 = node2->next){
                 /*right now this will repeat over certain entries twice*/
                 edge = node2->data;
                 processing = edge->to;
+
+                ifdebug(TRAFFIC) logger(LOG_ERR, "inside loop currently checking %s", processing->name);
 
                 /*check if the node is part of the same group*/
                 if ( ( processing != via) && (strspn(processing->name, via->name) >= mainlen) ){
@@ -569,11 +572,13 @@ void send_packet(const node_t *n, vpn_packet_t *packet) {
             }
         }
         /*update the bucket with the amount of data we sent to the node*/
+        ifdebug(TRAFFIC) logger(LOG_ERR, "old antibucket size of %s is %d", via->name,via->antibucket);
         via->antibucket += packet->len;
+        ifdebug(TRAFFIC) logger(LOG_ERR, "new antibucket size of %s is %d", via->name,via->antibucket);
         
 	if(via != n)
 		ifdebug(TRAFFIC) logger(LOG_INFO, "Sending packet to %s via %s (%s)",
-			   n->name, via->name, n->via->hostname);
+			   n->name, via->name, via->hostname);
 
 	if(packet->priority == -1 || ((myself->options | via->options) & OPTION_TCPONLY)) {
 		if(!send_tcppacket(via->connection, packet))
